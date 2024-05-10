@@ -8,6 +8,7 @@
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
 #include "userver/components/loggable_component_base.hpp"
+#include "userver/yaml_config/schema.hpp"
 
 namespace components::rate_manager {
 class Component final : public userver::components::LoggableComponentBase {
@@ -22,6 +23,7 @@ class Component final : public userver::components::LoggableComponentBase {
   std::unordered_map<std::string, models::ExchangeRates> AddExchangeRates()
       const;
   std::unordered_map<std::string, models::ExchangeRates> UpdateRates() const;
+  static userver::yaml_config::Schema GetStaticConfigSchema();
 
  private:
   userver::storages::postgres::ClusterPtr _pg_cluster;

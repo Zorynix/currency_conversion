@@ -15,6 +15,8 @@
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/storages/secdist/component.hpp"
 #include "userver/utils/from_string.hpp"
+#include "userver/yaml_config/merge_schemas.hpp"
+#include "userver/yaml_config/schema.hpp"
 
 static constexpr userver::http::headers::PredefinedHeader kApiKey{"apikey"};
 
@@ -38,8 +40,8 @@ std::unordered_map<std::string, models::Currency> Component::GetCurrencies()
     const {
   const auto& responce = _http_client.CreateRequest()
                              .get(_url_all_currencies)
-                             .headers(userver::clients::http::Headers(
-                                 {{kApiKey, _secret.api_key}}))
+                             .headers(
+                                 {{"apikey", _secret.api_key.GetUnderlying()}})
                              .perform();
 
   const auto& result =
@@ -70,63 +72,83 @@ std::unordered_map<std::string, models::Currency> Component::AddCurrencies()
 
 std::unordered_map<std::string, models::ExchangeRates>
 Component::GetExchangeRates() const {
-    const auto& responce = _http_client.CreateRequest().get(_url_latest_exchange_rates).headers(userver::clients::http::Headers({{kApiKey, _secret.api_key}})).perform();
+  const auto& responce = _http_client.CreateRequest()
+                             .get(_url_latest_exchange_rates)
+                             .headers(
+                                 {{"apikey", _secret.api_key.GetUnderlying()}})
+                             .perform();
 
-    const auto& result = userver::formats::json::FromString(responce.body_view())["data"].As<std::unordered_map<std::string, models::ExchangeRates>>();
+  const auto& result =
+      userver::formats::json::FromString(responce->body_view())["data"]
+          .As<std::unordered_map<std::string, models::ExchangeRates>>();
 
-
-    return result;
-
+  return result;
 }
 
 std::unordered_map<std::string, models::ExchangeRates>
 Component::AddExchangeRates() const {
-    
-    auto trx = _pg_cluster->Begin({});
+  auto trx = _pg_cluster->Begin({});
 
-    const auto& data = GetExchangeRates();
+  const auto& data = GetExchangeRates();
 
-    std::vector<models::ExchangeRates> rates;
-    rates.reserve(data.size());
+  std::vector<models::ExchangeRates> rates;
+  rates.reserve(data.size());
 
-    for (const auto& [key, value] : data) {
-        rates.push_back(value);
-    }
+  for (const auto& [key, value] : data) {
+    rates.push_back(value);
+  }
 
-    trx.ExecuteDecomposeBulk(sql::kInsertRates, rates);
-    trx.Commit();
+  trx.ExecuteDecomposeBulk(sql::kInsertRates, rates);
+  trx.Commit();
 
-    return data;
-
+  return data;
 }
 
-std::unordered_map<std::string, models::ExchangeRates>
-Component::UpdateRates()
-    const { 
-        
-        auto trx = _pg_cluster->Begin("trx__update_rates", userver::storages::postgres::ClusterHostType::kSlave, {});
-        
-        auto data = trx.Execute(sql::kGetHistory).AsContainer<std::vector<models::ExchangeRates>>(userver::storages::postgres::kRowTag);
+std::unordered_map<std::string, models::ExchangeRates> Component::UpdateRates()
+    const {
+  auto trx = _pg_cluster->Begin(
+      "trx__update_rates", userver::storages::postgres::ClusterHostType::kMaster,
+      {});
 
-        std::unordered_map<std::string, models::ExchangeRates> result;
+  std::unordered_map<std::string, models::ExchangeRates> result;
 
-        for (const auto& rate : data) {
-        result[rate.code] = rate;
-    }
+  auto count = trx.Execute(sql::kSelectHistoryCount).AsSingleRow<int>();
 
-        auto count = trx.Execute(sql::kSelectHistoryCount).AsSingleRow<int>();
+  if (count == 0) {
+    trx.Execute(sql::kInsertHistory);
+  } else {
+    trx.Execute(sql::kUpdateHistory);
+  }
+ 
+  AddExchangeRates();
 
-        if (count == 0) {
-            trx.Execute(sql::kInsertHistory);
-        }
-        else {
-            trx.Execute(sql::kUpdateHistory);
-        }
+  auto data = trx.Execute(sql::kGetHistory)
+                  .AsContainer<std::vector<models::ExchangeRates>>(
+                      userver::storages::postgres::kRowTag);
 
-        AddExchangeRates();
+  for (const auto& rate : data) {
+    result[rate.code] = rate;
+  }
 
-        return result;
+  trx.Commit();
 
-    }
+  return result;
+}
+
+userver::yaml_config::Schema Component::GetStaticConfigSchema() {
+  return userver::yaml_config::MergeSchemas<userver::components::LoggableComponentBase>(R"(
+type: object
+description: test component
+additionalProperties: false
+properties: 
+  url_all_currencies: 
+    type: string
+    description: url for all currencies
+  url_latest_exchange_rates:
+    type: string
+    description: url for exchange rates
+  )");
+}
+
 
 }  // namespace components::rate_manager

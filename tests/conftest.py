@@ -30,3 +30,7 @@ def pgsql_local(service_source_dir, pgsql_local_create):
         [service_source_dir.joinpath('postgresql/schemas')],
     )
     return pgsql_local_create(list(databases.values()))
+
+@pytest.fixture(scope="session")
+def allowed_url_prefixes_extra():
+    return ["https://api.currencyapi.com/"]

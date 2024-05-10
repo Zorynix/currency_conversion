@@ -32,6 +32,15 @@ add_library(${PROJECT_NAME}_objs OBJECT
     src/models/ExchangeRates.hpp
     src/components/rate_manager/component.hpp
     src/components/rate_manager/component.cpp
+    src/components/rate_manager/secdist.hpp
+    src/components/rate_manager/secdist.cpp
+    src/handlers/currencies/handler.hpp
+    src/handlers/currencies/handler.cpp
+    src/handlers/rates/handler.hpp
+    src/handlers/rates/handler.cpp
+    src/handlers/update/handler.hpp
+    src/handlers/update/handler.cpp
+
 )
 target_include_directories(${PROJECT_NAME}_objs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(${PROJECT_NAME}_objs PUBLIC userver::postgresql)

@@ -2,15 +2,17 @@
 #include <cstdint>
 #include <string>
 #include "userver/formats/json/value.hpp"
+#include "userver/formats/json/value_builder.hpp"
 #include "userver/formats/parse/to.hpp"
 #include "userver/storages/postgres/io/chrono.hpp"
+#include "userver/formats/serialize/to.hpp"
 
 namespace models {
 struct Currency {
   std::string code;
   std::string name;
   std::string symbol_native;
-  int8_t decimal_digits;
+  int decimal_digits;
   bool active;
   int main_area_id;
   userver::storages::postgres::TimePointTz created_at;
@@ -32,5 +34,22 @@ inline Currency Parse(const userver::formats::json::Value& json,
       json["deleted_at"].As<userver::storages::postgres::TimePointTz>(),
   };
 }
+
+
+inline userver::formats::json::Value Serialize(const Currency& data, userver::formats::serialize::To<userver::formats::json::Value>){
+  userver::formats::json::ValueBuilder builder;
+  builder["code"] = data.code;
+  builder["name"] = data.name;
+  builder["symbol_native"] = data.symbol_native;
+  builder["decimal_digits"] = data.decimal_digits;
+  builder["active"] = data.active;
+  builder["main_area_id"] = data.main_area_id;
+  builder["created_at"] = data.created_at;
+  builder["updated_at"] = data.updated_at;
+  builder["deleted_at"] = data.deleted_at;
+
+  return builder.ExtractValue();
+}
+
 
 }  // namespace models

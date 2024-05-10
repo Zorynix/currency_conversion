@@ -69,7 +69,7 @@ components_manager:
             method: GET
             task_processor: main-task-processor
 
-        handler-currencies:
+        handler-update:
             path: /v1/update
             method: GET
             task_processor: main-task-processor
