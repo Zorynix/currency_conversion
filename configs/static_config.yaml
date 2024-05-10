@@ -32,6 +32,15 @@ components_manager:
                     network_timeout_ms: 750
                     statement_timeout_ms: 500
 
+        secdist:
+            provider: default-secdist-provider
+        default-secdist-provider:
+            config: $secdist-path
+
+        rate-manager:
+            url_all_currencies: "https://api.currencyapi.com/v3/currencies"
+            url_latest_exchange_rates: "https://api.currencyapi.com/v3/latest"
+
         testsuite-support: {}
 
         http-client:
@@ -50,11 +59,21 @@ components_manager:
             throttling_enabled: false
             url_trailing_slash: strict-match
 
-        handler-hello:                    # Finally! Our handler.
-            path: /v1/hello               # Registering handler by URL '/v1/hello'.
-            method: POST                  # It will only reply to POST requests.
-            task_processor: main-task-processor  # Run it on CPU bound task processor
+        handler-rates:
+            path: /v1/rates
+            method: GET
+            task_processor: main-task-processor
+        
+        handler-currencies:
+            path: /v1/currencies
+            method: GET
+            task_processor: main-task-processor
 
+        handler-currencies:
+            path: /v1/update
+            method: GET
+            task_processor: main-task-processor
+    
         postgres-db-1:
             dbconnection: $dbconnection
             blocking_task_processor: fs-task-processor
