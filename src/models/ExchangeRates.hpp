@@ -1,10 +1,10 @@
 #pragma once
 #include <string>
 #include "userver/formats/json/value.hpp"
-#include "userver/formats/parse/common_containers.hpp"
-#include "userver/formats/serialize/common_containers.hpp"
 #include "userver/formats/json/value_builder.hpp"
+#include "userver/formats/parse/common_containers.hpp"
 #include "userver/formats/parse/to.hpp"
+#include "userver/formats/serialize/common_containers.hpp"
 #include "userver/formats/serialize/to.hpp"
 #include "userver/storages/postgres/io/chrono.hpp"
 #include "userver/utils/datetime.hpp"
@@ -29,13 +29,21 @@ inline ExchangeRates Parse(const userver::formats::json::Value& json,
       json["target_currency_id"].As<int>(0),
       json["value"].As<double>(),
       json["rate_source_id"].As<int>(0),
-      json["created_at"].As<std::optional<userver::storages::postgres::TimePointTz>>(userver::utils::datetime::Now()),
-      json["updated_at"].As<std::optional<userver::storages::postgres::TimePointTz>>(userver::utils::datetime::Now()),
-      json["deleted_at"].As<std::optional<userver::storages::postgres::TimePointTz>>(userver::utils::datetime::Now()),
+      json["created_at"]
+          .As<std::optional<userver::storages::postgres::TimePointTz>>(
+              userver::utils::datetime::Now()),
+      json["updated_at"]
+          .As<std::optional<userver::storages::postgres::TimePointTz>>(
+              userver::utils::datetime::Now()),
+      json["deleted_at"]
+          .As<std::optional<userver::storages::postgres::TimePointTz>>(
+              userver::utils::datetime::Now()),
   };
 }
 
-inline userver::formats::json::Value Serialize(const ExchangeRates& data, userver::formats::serialize::To<userver::formats::json::Value>){
+inline userver::formats::json::Value Serialize(
+    const ExchangeRates& data,
+    userver::formats::serialize::To<userver::formats::json::Value>) {
   userver::formats::json::ValueBuilder builder;
   builder["code"] = data.code;
   builder["currency_id"] = data.currency_id;
@@ -48,6 +56,5 @@ inline userver::formats::json::Value Serialize(const ExchangeRates& data, userve
 
   return builder.ExtractValue();
 }
-
 
 }  // namespace models

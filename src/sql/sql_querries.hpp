@@ -5,10 +5,9 @@ namespace sql {
 
 const userver::storages::postgres::Query kInsertCurrencies{
     "INSERT INTO currencies.currencies(code, name, symbol_native, "
-    "decimal_digits, active, main_area_id, created_at, updated_at, deleted_at) "
+    "decimal_digits,created_at, updated_at, deleted_at) "
     "VALUES (UNNEST($1), UNNEST($2), "
-    "UNNEST($3), UNNEST($4), UNNEST($5), UNNEST($6), UNNEST($7), UNNEST($8), "
-    "UNNEST($9));",
+    "UNNEST($3), UNNEST($4), UNNEST($5), UNNEST($6), UNNEST($7));",
     userver::storages::postgres::Query::Name{"InsertCurrencies"}};
 
 const userver::storages::postgres::Query kInsertRates{
@@ -18,6 +17,22 @@ const userver::storages::postgres::Query kInsertRates{
     "UNNEST($3), UNNEST($4), UNNEST($5), UNNEST($6), UNNEST($7), UNNEST($8)"
     ");",
     userver::storages::postgres::Query::Name{"InsertRates"}};
+
+
+const userver::storages::postgres::Query kSelectRatesCount{
+    "SELECT COUNT(1) FROM currencies.exchange_rates",
+    userver::storages::postgres::Query::Name{"SelectRatesCount"}};
+
+const userver::storages::postgres::Query kUpdateRates{
+    "INSERT INTO currencies.exchange_rates(code, currency_id, "
+    "target_currency_id, exchange_rate, rate_source_id, created_at, "
+    "updated_at, deleted_at) SELECT * FROM currencies.exchange_rates ON "
+    "CONFLICT(code) DO UPDATE SET currency_id = "
+    "EXCLUDED.currency_id, target_currency_id = EXCLUDED.target_currency_id, "
+    "exchange_rate = EXCLUDED.exchange_rate,  rate_source_id = "
+    "EXCLUDED.rate_source_id, updated_at = "
+    "EXCLUDED.updated_at , deleted_at = EXCLUDED.deleted_at",
+    userver::storages::postgres::Query::Name{"UpdateRates"}};
 
 const userver::storages::postgres::Query kSelectHistoryCount{
     "SELECT COUNT(1) FROM currencies.exchange_rate_histories",
@@ -32,10 +47,10 @@ const userver::storages::postgres::Query kUpdateHistory{
     "INSERT INTO currencies.exchange_rate_histories(code, currency_id, "
     "target_currency_id, exchange_rate, rate_source_id, created_at, "
     "updated_at, deleted_at) SELECT * FROM currencies.exchange_rates ON "
-    "CONFLICT(code) DO UPDATE SET code = EXCLUDED.code, currency_id = "
+    "CONFLICT(code) DO UPDATE SET currency_id = "
     "EXCLUDED.currency_id, target_currency_id = EXCLUDED.target_currency_id, "
     "exchange_rate = EXCLUDED.exchange_rate,  rate_source_id = "
-    "EXCLUDED.rate_source_id, created_at = EXCLUDED.created_at , updated_at = "
+    "EXCLUDED.rate_source_id, updated_at = "
     "EXCLUDED.updated_at , deleted_at = EXCLUDED.deleted_at",
     userver::storages::postgres::Query::Name{"UpdateHistory"}};
 

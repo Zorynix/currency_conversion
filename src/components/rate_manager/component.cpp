@@ -38,11 +38,11 @@ Component::Component(const userver::components::ComponentConfig& config,
 
 std::unordered_map<std::string, models::Currency> Component::GetCurrencies()
     const {
-  const auto& responce = _http_client.CreateRequest()
-                             .get(_url_all_currencies)
-                             .headers(
-                                 {{"apikey", _secret.api_key.GetUnderlying()}})
-                             .perform();
+  const auto& responce =
+      _http_client.CreateRequest()
+          .get(_url_all_currencies)
+          .headers({{"apikey", _secret.api_key.GetUnderlying()}})
+          .perform();
 
   const auto& result =
       userver::formats::json::FromString(responce->body_view())["data"]
@@ -72,11 +72,11 @@ std::unordered_map<std::string, models::Currency> Component::AddCurrencies()
 
 std::unordered_map<std::string, models::ExchangeRates>
 Component::GetExchangeRates() const {
-  const auto& responce = _http_client.CreateRequest()
-                             .get(_url_latest_exchange_rates)
-                             .headers(
-                                 {{"apikey", _secret.api_key.GetUnderlying()}})
-                             .perform();
+  const auto& responce =
+      _http_client.CreateRequest()
+          .get(_url_latest_exchange_rates)
+          .headers({{"apikey", _secret.api_key.GetUnderlying()}})
+          .perform();
 
   const auto& result =
       userver::formats::json::FromString(responce->body_view())["data"]
@@ -91,6 +91,8 @@ Component::AddExchangeRates() const {
 
   const auto& data = GetExchangeRates();
 
+  auto count = trx.Execute(sql::kSelectRatesCount).AsSingleRow<int>();
+
   std::vector<models::ExchangeRates> rates;
   rates.reserve(data.size());
 
@@ -98,7 +100,12 @@ Component::AddExchangeRates() const {
     rates.push_back(value);
   }
 
-  trx.ExecuteDecomposeBulk(sql::kInsertRates, rates);
+  if (count == 0) {
+    trx.ExecuteDecomposeBulk(sql::kInsertRates, rates);
+  } else {
+    trx.Execute(sql::kUpdateRates);
+  }
+
   trx.Commit();
 
   return data;
@@ -107,8 +114,8 @@ Component::AddExchangeRates() const {
 std::unordered_map<std::string, models::ExchangeRates> Component::UpdateRates()
     const {
   auto trx = _pg_cluster->Begin(
-      "trx__update_rates", userver::storages::postgres::ClusterHostType::kMaster,
-      {});
+      "trx__update_rates",
+      userver::storages::postgres::ClusterHostType::kMaster, {});
 
   std::unordered_map<std::string, models::ExchangeRates> result;
 
@@ -119,7 +126,7 @@ std::unordered_map<std::string, models::ExchangeRates> Component::UpdateRates()
   } else {
     trx.Execute(sql::kUpdateHistory);
   }
- 
+
   AddExchangeRates();
 
   auto data = trx.Execute(sql::kGetHistory)
@@ -136,7 +143,8 @@ std::unordered_map<std::string, models::ExchangeRates> Component::UpdateRates()
 }
 
 userver::yaml_config::Schema Component::GetStaticConfigSchema() {
-  return userver::yaml_config::MergeSchemas<userver::components::LoggableComponentBase>(R"(
+  return userver::yaml_config::MergeSchemas<
+      userver::components::LoggableComponentBase>(R"(
 type: object
 description: test component
 additionalProperties: false
@@ -149,6 +157,5 @@ properties:
     description: url for exchange rates
   )");
 }
-
 
 }  // namespace components::rate_manager

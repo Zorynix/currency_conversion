@@ -8,13 +8,13 @@ Handler::Handler(const userver::components::ComponentConfig& config,
     : userver::server::handlers::HttpHandlerJsonBase(config, context),
       _rate_manager(
           context.FindComponent<components::rate_manager::Component>()){};
-    
-    userver::formats::json::Value Handler::HandleRequestJsonThrow(
-      const userver::server::http::HttpRequest&, const userver::formats::json::Value& json,
-      userver::server::request::RequestContext&) const {
-        
-        auto data = _rate_manager.AddCurrencies();
 
-       return userver::formats::json::ValueBuilder{data}.ExtractValue();
-      }
+userver::formats::json::Value Handler::HandleRequestJsonThrow(
+    const userver::server::http::HttpRequest&,
+    const userver::formats::json::Value& json,
+    userver::server::request::RequestContext&) const {
+  auto data = _rate_manager.AddCurrencies();
+
+  return userver::formats::json::ValueBuilder{data}.ExtractValue();
 }
+}  // namespace handlers::currencies

@@ -16,20 +16,20 @@
 #include "userver/storages/secdist/provider_component.hpp"
 
 int main(int argc, char* argv[]) {
-  auto component_list = userver::components::MinimalServerComponentList()
-                            .Append<userver::server::handlers::Ping>()
-                            .Append<userver::components::TestsuiteSupport>()
-                            .Append<userver::components::HttpClient>()
-                            .Append<userver::server::handlers::TestsControl>()
-                            .Append<components::rate_manager::Component>()
-                            .Append<userver::components::Secdist>()
-                            .Append<userver::components::DefaultSecdistProvider>()
-                            .Append<handlers::currencies::Handler>()
-                            .Append<handlers::rates::Handler>()
-                            .Append<handlers::update::Handler>()
-                            .Append<userver::components::Postgres>("postgres-db-1")
-                            .Append<userver::clients::dns::Component>();
-
+  auto component_list =
+      userver::components::MinimalServerComponentList()
+          .Append<userver::server::handlers::Ping>()
+          .Append<userver::components::TestsuiteSupport>()
+          .Append<userver::components::HttpClient>()
+          .Append<userver::server::handlers::TestsControl>()
+          .Append<components::rate_manager::Component>()
+          .Append<userver::components::Secdist>()
+          .Append<userver::components::DefaultSecdistProvider>()
+          .Append<handlers::currencies::Handler>()
+          .Append<handlers::rates::Handler>()
+          .Append<handlers::update::Handler>()
+          .Append<userver::components::Postgres>("postgres-db-1")
+          .Append<userver::clients::dns::Component>();
 
   return userver::utils::DaemonMain(argc, argv, component_list);
 }

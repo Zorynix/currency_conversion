@@ -17,4 +17,4 @@ class Handler final : public userver::server::handlers::HttpHandlerJsonBase {
   const components::rate_manager::Component& _rate_manager;
 };
 
-}  // namespace handlers::rates
+}  // namespace handlers::currencies
