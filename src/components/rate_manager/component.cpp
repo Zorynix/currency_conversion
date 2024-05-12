@@ -6,19 +6,16 @@
 #include "models/ExchangeRates.hpp"
 #include "sql/sql_querries.hpp"
 #include "userver/clients/http/component.hpp"
-#include "userver/clients/http/response.hpp"
 #include "userver/components/loggable_component_base.hpp"
-#include "userver/http/predefined_header.hpp"
 #include "userver/storages/postgres/cluster.hpp"
 #include "userver/storages/postgres/cluster_types.hpp"
 #include "userver/storages/postgres/component.hpp"
 #include "userver/storages/postgres/io/row_types.hpp"
 #include "userver/storages/secdist/component.hpp"
-#include "userver/utils/from_string.hpp"
 #include "userver/yaml_config/merge_schemas.hpp"
 #include "userver/yaml_config/schema.hpp"
 
-static constexpr userver::http::headers::PredefinedHeader kApiKey{"apikey"};
+// static constexpr userver::http::headers::PredefinedHeader kApiKey{"apikey"};
 
 namespace components::rate_manager {
 Component::Component(const userver::components::ComponentConfig& config,
@@ -91,8 +88,6 @@ Component::AddExchangeRates() const {
 
   const auto& data = GetExchangeRates();
 
-  auto count = trx.Execute(sql::kSelectRatesCount).AsSingleRow<int>();
-
   std::vector<models::ExchangeRates> rates;
   rates.reserve(data.size());
 
@@ -100,11 +95,7 @@ Component::AddExchangeRates() const {
     rates.push_back(value);
   }
 
-  if (count == 0) {
-    trx.ExecuteDecomposeBulk(sql::kInsertRates, rates);
-  } else {
-    trx.Execute(sql::kUpdateRates);
-  }
+  trx.ExecuteDecomposeBulk(sql::kInsertRates, rates);
 
   trx.Commit();
 
@@ -119,15 +110,7 @@ std::unordered_map<std::string, models::ExchangeRates> Component::UpdateRates()
 
   std::unordered_map<std::string, models::ExchangeRates> result;
 
-  auto count = trx.Execute(sql::kSelectHistoryCount).AsSingleRow<int>();
-
-  if (count == 0) {
-    trx.Execute(sql::kInsertHistory);
-  } else {
-    trx.Execute(sql::kUpdateHistory);
-  }
-
-  AddExchangeRates();
+  trx.Execute(sql::kInsertHistory);
 
   auto data = trx.Execute(sql::kGetHistory)
                   .AsContainer<std::vector<models::ExchangeRates>>(
@@ -136,6 +119,8 @@ std::unordered_map<std::string, models::ExchangeRates> Component::UpdateRates()
   for (const auto& rate : data) {
     result[rate.code] = rate;
   }
+
+  AddExchangeRates();
 
   trx.Commit();
 

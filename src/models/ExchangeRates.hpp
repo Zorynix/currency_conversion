@@ -1,9 +1,12 @@
 #pragma once
+#include <boost/uuid/uuid.hpp>
 #include <string>
 #include "userver/formats/json/value.hpp"
 #include "userver/formats/json/value_builder.hpp"
+#include "userver/formats/parse/boost_uuid.hpp"
 #include "userver/formats/parse/common_containers.hpp"
 #include "userver/formats/parse/to.hpp"
+#include "userver/formats/serialize/boost_uuid.hpp"
 #include "userver/formats/serialize/common_containers.hpp"
 #include "userver/formats/serialize/to.hpp"
 #include "userver/storages/postgres/io/chrono.hpp"
@@ -11,6 +14,7 @@
 
 namespace models {
 struct ExchangeRates {
+  // std::optional<boost::uuids::uuid> id;
   std::string code;
   int currency_id;
   int target_currency_id;
@@ -24,6 +28,7 @@ struct ExchangeRates {
 inline ExchangeRates Parse(const userver::formats::json::Value& json,
                            userver::formats::parse::To<ExchangeRates>) {
   return ExchangeRates{
+      // json["id"].As<std::optional<boost::uuids::uuid>>(),
       json["code"].As<std::string>(),
       json["currency_id"].As<int>(0),
       json["target_currency_id"].As<int>(0),
@@ -45,6 +50,7 @@ inline userver::formats::json::Value Serialize(
     const ExchangeRates& data,
     userver::formats::serialize::To<userver::formats::json::Value>) {
   userver::formats::json::ValueBuilder builder;
+  // builder["id"] = data.id;
   builder["code"] = data.code;
   builder["currency_id"] = data.currency_id;
   builder["target_currency_id"] = data.target_currency_id;

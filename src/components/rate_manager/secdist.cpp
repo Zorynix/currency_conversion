@@ -1,5 +1,4 @@
 #include "secdist.hpp"
-#include "userver/formats/json.hpp"
 #include "userver/formats/json/value.hpp"
 
 namespace components::rate_manager::secdist_config {
