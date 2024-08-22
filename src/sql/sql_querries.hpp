@@ -28,7 +28,10 @@ const userver::storages::postgres::Query kInsertRates{
     userver::storages::postgres::Query::Name{"InsertRates"}};
 
 const userver::storages::postgres::Query kInsertHistory{
-    "INSERT INTO currencies.exchange_rate_histories(code, currency_id, target_currency_id, exchange_rate, rate_source_id, created_at, updated_at, deleted_at) SELECT code, currency_id, target_currency_id, exchange_rate, rate_source_id, created_at, updated_at, deleted_at FROM "
+    "INSERT INTO currencies.exchange_rate_histories(code, currency_id, "
+    "target_currency_id, exchange_rate, rate_source_id, created_at, "
+    "updated_at, deleted_at) SELECT code, currency_id, target_currency_id, "
+    "exchange_rate, rate_source_id, created_at, updated_at, deleted_at FROM "
     "currencies.exchange_rates ON CONFLICT (code) DO UPDATE SET currency_id = "
     "EXCLUDED.currency_id, target_currency_id = EXCLUDED.target_currency_id, "
     "exchange_rate = EXCLUDED.exchange_rate, rate_source_id = "
@@ -37,7 +40,9 @@ const userver::storages::postgres::Query kInsertHistory{
     userver::storages::postgres::Query::Name{"InsertHistory"}};
 
 const userver::storages::postgres::Query kGetHistory{
-    "SELECT code, currency_id, target_currency_id, exchange_rate, rate_source_id, created_at, updated_at, deleted_at FROM currencies.exchange_rate_histories;",
+    "SELECT code, currency_id, target_currency_id, exchange_rate, "
+    "rate_source_id, created_at, updated_at, deleted_at FROM "
+    "currencies.exchange_rate_histories;",
     userver::storages::postgres::Query::Name{"GetHistory"}};
 
 }  // namespace sql

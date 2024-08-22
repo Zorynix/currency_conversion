@@ -11,7 +11,7 @@ Handler::Handler(const userver::components::ComponentConfig& config,
 
 userver::formats::json::Value Handler::HandleRequestJsonThrow(
     const userver::server::http::HttpRequest&,
-    const userver::formats::json::Value& json,
+    const userver::formats::json::Value&,
     userver::server::request::RequestContext&) const {
   auto data = _rate_manager.AddExchangeRates();
 

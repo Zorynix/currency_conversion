@@ -1,9 +1,9 @@
 #pragma once
 
 #include <unordered_map>
+#include <userver/storages/postgres/postgres_fwd.hpp>
 #include "components/rate_manager/secdist.hpp"
-#include "models/Currency.hpp"
-#include "models/ExchangeRates.hpp"
+#include "schemas/schemas.hpp"
 #include "userver/clients/http/client.hpp"
 #include "userver/components/component_config.hpp"
 #include "userver/components/component_context.hpp"
@@ -16,13 +16,13 @@ class Component final : public userver::components::LoggableComponentBase {
   static constexpr std::string_view kName = "rate-manager";
   Component(const userver::components::ComponentConfig&,
             const userver::components::ComponentContext&);
-  std::unordered_map<std::string, models::Currency> GetCurrencies() const;
-  std::unordered_map<std::string, models::Currency> AddCurrencies() const;
-  std::unordered_map<std::string, models::ExchangeRates> GetExchangeRates()
+  std::unordered_map<std::string, models::rates::Currency> GetCurrencies() const;
+  std::unordered_map<std::string, models::rates::Currency> AddCurrencies() const;
+  std::unordered_map<std::string, models::rates::ExchangeRate> GetExchangeRates()
       const;
-  std::unordered_map<std::string, models::ExchangeRates> AddExchangeRates()
+  std::unordered_map<std::string, models::rates::ExchangeRate> AddExchangeRates()
       const;
-  std::unordered_map<std::string, models::ExchangeRates> UpdateRates() const;
+  std::unordered_map<std::string, models::rates::ExchangeRate> UpdateRates() const;
   static userver::yaml_config::Schema GetStaticConfigSchema();
 
  private:

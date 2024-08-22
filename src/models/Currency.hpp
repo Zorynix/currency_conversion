@@ -14,7 +14,6 @@
 
 namespace models {
 struct Currency {
-  // std::optional<boost::uuids::uuid> id;
   std::string code;
   std::string name;
   std::string symbol_native;
@@ -27,7 +26,6 @@ struct Currency {
 inline Currency Parse(const userver::formats::json::Value& json,
                       userver::formats::parse::To<Currency>) {
   return Currency{
-      // json["id"].As< std::optional<boost::uuids::uuid>>(),
       json["code"].As<std::string>(),
       json["name"].As<std::string>(),
       json["symbol_native"].As<std::string>(),
@@ -48,7 +46,6 @@ inline userver::formats::json::Value Serialize(
     const Currency& data,
     userver::formats::serialize::To<userver::formats::json::Value>) {
   userver::formats::json::ValueBuilder builder;
-  // builder["id"] = data.id;
   builder["code"] = data.code;
   builder["name"] = data.name;
   builder["symbol_native"] = data.symbol_native;

@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: "API"
+  version: "1.0.0"
+
+components:
+    schemas:
+        Currency:
+            type: object
+            additionalProperties: true
+            properties:
+                code:
+                  type: string
+                name:
+                  type: string
+                symbol_native:
+                  type: string
+                decimal_digits:
+                  type: integer
+                # created_at:
+                #   type: string
+                #   format: date-time
+                #   x-usrv-cpp-type: USERVER_NAMESPACE::storages::postgres::TimePointTz
+                # updated_at:
+                #   type: string
+                #   format: date-time
+                #   x-usrv-cpp-type: USERVER_NAMESPACE::storages::postgres::TimePointTz
+                # deleted_at:
+                #   type: string
+                #   format: date-time
+                #   x-usrv-cpp-type: USERVER_NAMESPACE::storages::postgres::TimePointTz
+            required:
+              - code
+              - name
+              - symbol_native
+              - decimal_digits
+        ExchangeRate:
+          type: object
+          additionalProperties: true
+          properties:
+            code:
+                  type: string
+            currency_id:
+              type: integer
+            target_currency_id:
+              type: integer
+            exchange_rate:
+              type: number
+            rate_source_id:
+              type: integer
+            # created_at:
+            #       type: string
+            #       format: date-time
+            #       x-usrv-cpp-type: USERVER_NAMESPACE::storages::postgres::TimePointTz
+            # updated_at:
+            #       type: string
+            #       format: date-time
+            #       x-usrv-cpp-type: USERVER_NAMESPACE::storages::postgres::TimePointTz
+            # deleted_at:
+            #       type: string
+            #       format: date-time
+            #       x-usrv-cpp-type: USERVER_NAMESPACE::storages::postgres::TimePointTz
+          required:
+            - code
+            - currency_id
+            - target_currency_id
+            - exchange_rate
+            - rate_source_id
